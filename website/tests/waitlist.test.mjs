@@ -19,7 +19,14 @@ test('provider rejection cleans up pending records and fails visibly',async()=>{
 test('duplicates do not send; storage errors fail closed',async()=>{
  const original=global.fetch;let n=0;global.fetch=async()=>{n++;return Response.json({result:null});};try{await subscribe('duplicate@example.com');assert.equal(n,1);global.fetch=async()=>Response.json({error:'unavailable'});await assert.rejects(redis(['GET','x']),/STORAGE_COMMAND/);}finally{global.fetch=original;}
 });
-test('email markup escapes link values',()=>{assert.ok(!emailContent('https://example.com/" onclick="bad','x').html.includes('href="https://example.com/" onclick='));});
+test('email markup is branded, accessible, and escapes link values',()=>{
+ const content=emailContent('https://example.com/" onclick="bad','https://example.com/unsubscribe');
+ assert.ok(!content.html.includes('href="https://example.com/" onclick='));
+ assert.match(content.html,/YOU’RE ALMOST IN/);
+ assert.match(content.html,/Zeno &amp; Benjamin/);
+ assert.match(content.html,/role="presentation"/);
+ assert.match(content.text,/What happens next:/);
+});
 
 test('malformed API keys fail before creating pending records or sending',async()=>{
  const original=global.fetch,key=process.env.RESEND_API_KEY;let calls=0;
