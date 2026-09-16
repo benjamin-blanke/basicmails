@@ -209,7 +209,7 @@ If you want a template, see `.github/PULL_REQUEST_TEMPLATE.md` (coming soon — 
 This project is available under the LICENSE in this repository.
 
 ## Contact & Support
-Built with care by the BasicMails team — https://github.com/benjamin-blanke
+Built with care by [Benjamin](https://blanke.lol)
 
 For hosting, enterprise features, or security questions, open an issue or reach out via the contact listed on the profile.
 
