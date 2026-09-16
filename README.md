@@ -6,14 +6,6 @@
 ![Stars](https://img.shields.io/github/stars/benjamin-blanke/basicmails?style=social)
 ![Issues](https://img.shields.io/github/issues/benjamin-blanke/basicmails)
 
-```text
-  ____            _        __  __ _ _      
- |  _ \ __ _  ___| | __   |  \/  (_) |_ ___
- | |_) / _` |/ __| |/ /   | |\/| | | __/ _ \
- |  __/ (_| | (__|   <    | |  | | | ||  __/
- |_|   \__,_|\___|_|\_\   |_|  |_|_|\__\___|
-```
-
 A modern, simple, and reliable email provider built for everyday communication. Fast, secure, and privacy-first — designed for both personal and professional use.
 
 ---
