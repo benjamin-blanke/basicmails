@@ -9,7 +9,7 @@ export function safeFailure(error:unknown){
  console.error(JSON.stringify({event:'waitlist_failure',code,status:error instanceof WaitlistError?error.providerStatus:undefined}));
  return code;
 }
-const TWO_DAYS=172800, YEAR=31536000;
+const TWO_DAYS=172800, YEAR=31536000, RESEND_COOLDOWN=300;
 export function config(){
  const RESEND_API_KEY=process.env.RESEND_API_KEY?.trim(),RESEND_FROM=process.env.RESEND_FROM?.trim(),UPSTASH_REDIS_REST_URL=process.env.UPSTASH_REDIS_REST_URL?.trim().replace(/\/$/,''),UPSTASH_REDIS_REST_TOKEN=process.env.UPSTASH_REDIS_REST_TOKEN?.trim();
  if(!RESEND_API_KEY||!RESEND_FROM||!UPSTASH_REDIS_REST_URL||!UPSTASH_REDIS_REST_TOKEN)return null;
@@ -59,16 +59,23 @@ export async function subscribe(email:string){
  const c=config();if(!c)throw new Error('Not configured');
  if(!/^re_[A-Za-z0-9_-]+$/.test(c.key))throw new WaitlistError('EMAIL_KEY_FORMAT');
  const lock=`wl:email:${digest(email)}`;
- const acquired=await redis<string|null>(['SET',lock,'1','NX','EX',3600]);if(!acquired)return;
+ let acquired=await redis<string|null>(['SET',lock,'1','NX','EX',RESEND_COOLDOWN]);
+ if(!acquired){
+  const existingKey=await redis<string|null>(['GET',`wl:address:${digest(email)}`]);
+  const existingRaw=existingKey?await redis<string|null>(['GET',existingKey]):null;
+  if(existingRaw){try{const existing=JSON.parse(existingRaw) as Entry;if(existing.status==='pending'&&Date.now()-Date.parse(existing.requestedAt)>=RESEND_COOLDOWN*1000){await redis(['DEL',lock]);acquired=await redis<string|null>(['SET',lock,'1','NX','EX',RESEND_COOLDOWN]);}}catch{}}
+ }
+ if(!acquired)return false;
  const total=await redis<number>(['EVAL',throttleScript,1,`wl:daily:${new Date().toISOString().slice(0,10)}`,86400]);
  if(total>100){await redis(['DEL',lock]);throw new WaitlistError('DAILY_SEND_LIMIT');}
  const token=randomBytes(32).toString('hex'),removeToken=randomBytes(32).toString('hex');
  const entryKey=`wl:entry:${digest(token)}`,removeKey=`wl:unsubscribe:${digest(removeToken)}`;
  const entry:Entry={email,status:'pending',requestedAt:new Date().toISOString(),consentVersion:CONSENT_VERSION,unsubscribeKey:removeKey,unsubscribeToken:removeToken,addressKey:`wl:address:${digest(email)}`};
  // Both records are stored atomically before sending so every emailed link is usable.
- const stored=await redis<number>(['EVAL',"local old=redis.call('GET',KEYS[3]);if old then local raw=redis.call('GET',old);if raw then local previous=cjson.decode(raw);local ttl=redis.call('TTL',old);if previous.status~='pending' or ttl<0 or ttl>tonumber(ARGV[2])-3600 then return 0 end;redis.call('DEL',previous.unsubscribeKey,old);end;end;redis.call('SET',KEYS[1],ARGV[1],'EX',ARGV[2]);redis.call('SET',KEYS[2],KEYS[1],'EX',ARGV[2]);redis.call('SET',KEYS[3],KEYS[1],'EX',ARGV[2]);return 1",3,entryKey,removeKey,entry.addressKey,JSON.stringify(entry),TWO_DAYS]);if(!stored)return;
+ const stored=await redis<number>(['EVAL',"local old=redis.call('GET',KEYS[3]);if old then local raw=redis.call('GET',old);if raw then local previous=cjson.decode(raw);local ttl=redis.call('TTL',old);if previous.status~='pending' or ttl<0 or ttl>tonumber(ARGV[2])-300 then return 0 end;redis.call('DEL',previous.unsubscribeKey,old);end;end;redis.call('SET',KEYS[1],ARGV[1],'EX',ARGV[2]);redis.call('SET',KEYS[2],KEYS[1],'EX',ARGV[2]);redis.call('SET',KEYS[3],KEYS[1],'EX',ARGV[2]);return 1",3,entryKey,removeKey,entry.addressKey,JSON.stringify(entry),TWO_DAYS]);if(!stored)return false;
  const content=emailContent(`${c.origin}/waitlist/confirm#${token}`,`${c.origin}/waitlist/unsubscribe#${removeToken}`);
  let response:Response;try{response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${c.key}`,'Content-Type':'application/json','Idempotency-Key':`waitlist-${digest(token)}`},body:JSON.stringify({from:c.from,to:[email],subject:'One more click — confirm your BasicMails place',...content}),signal:AbortSignal.timeout(10000)});}catch{throw new WaitlistError('EMAIL_CONNECTION');}
  if(!response.ok){let detail:{name?:string;message?:string}={};try{detail=await response.json();}catch{}const name=String(detail.name??'');const msg=String(detail.message??'').toLowerCase();const code=/domain|verify|verified|testing emails/.test(msg)?'EMAIL_DOMAIN':response.status===401||name==='invalid_api_key'?'EMAIL_AUTH':/from|sender/.test(msg)?'EMAIL_SENDER':response.status===429?'EMAIL_LIMIT':response.status===403?'EMAIL_PERMISSION':'EMAIL_REJECTED';try{await redis(['DEL',entryKey,removeKey,entry.addressKey,lock]);}catch{safeFailure(new WaitlistError('EMAIL_CLEANUP'));}throw new WaitlistError(code,response.status);}
- // On a network timeout records deliberately remain: Resend may have accepted the send.
+ console.info(JSON.stringify({event:'waitlist_email_accepted'}));
+ return true;
 }

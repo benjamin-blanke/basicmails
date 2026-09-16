@@ -17,7 +17,7 @@ test('provider rejection cleans up pending records and fails visibly',async()=>{
  const original=global.fetch;const commands=[];global.fetch=async(url,options)=>{if(String(url)==='https://redis.example'){const c=JSON.parse(options.body);commands.push(c);return Response.json({result:c[0]==='SET'?'OK':1});}return Response.json({message:'invalid sender'},{status:422});};try{await assert.rejects(subscribe('rejected@example.com'),/EMAIL_SENDER/);assert.equal(commands.at(-1)[0],'DEL');assert.equal(commands.at(-1).length,5);}finally{global.fetch=original;}
 });
 test('duplicates do not send; storage errors fail closed',async()=>{
- const original=global.fetch;let n=0;global.fetch=async()=>{n++;return Response.json({result:null});};try{await subscribe('duplicate@example.com');assert.equal(n,1);global.fetch=async()=>Response.json({error:'unavailable'});await assert.rejects(redis(['GET','x']),/STORAGE_COMMAND/);}finally{global.fetch=original;}
+ const original=global.fetch;let n=0;global.fetch=async()=>{n++;return Response.json({result:null});};try{await subscribe('duplicate@example.com');assert.equal(n,2);global.fetch=async()=>Response.json({error:'unavailable'});await assert.rejects(redis(['GET','x']),/STORAGE_COMMAND/);}finally{global.fetch=original;}
 });
 test('email markup is branded, accessible, and escapes link values',()=>{
  const content=emailContent('https://example.com/" onclick="bad','https://example.com/unsubscribe');
