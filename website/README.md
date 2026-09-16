@@ -65,3 +65,15 @@ node --experimental-strip-types --test tests/demo-auth.test.mjs
 ```
 
 The source remains in `website/`. Import that subfolder as the Vercel root when linking GitHub.
+
+## Team, legal page and connection protection
+
+`/team` lists Benjamin (Founder), Zeno (Co-Founder), and Carlos (Marketing Manager). `/impressum` contains the supplied legal notice verbatim and remains reachable from restricted connections.
+
+Add `PROXYCHECK_API_KEY` as a private/sensitive Vercel environment variable for Production (and Preview if desired), then redeploy. The key is used only on the server. Until configured, the connection filter is inactive. The existing `DEMO_PASSWORD` still protects the mailbox independently.
+
+Next.js Proxy checks the Vercel-provided visitor IP against the supported proxycheck.io v2 API (`vpn=1&asn=1`). Detected proxies, VPNs, Tor and hosting connections are redirected to `/access-restricted`, which returns HTTP 403 with IP, type, provider, ASN and Retry. API calls return 403 JSON. No Discord authentication or login exemption is implied. Assets, legal information, sitemap/robots, and logout remain accessible.
+
+When configured, lookup errors, quota failures and missing visitor IPs return a separate HTTP 503 screen, never a false VPN accusation. Lookups time out after four seconds. A bounded per-instance memory cache stores allowed results for 60 seconds and blocked results for 15 seconds; this is not a distributed cache. IP addresses are sent to proxycheck.io for the lookup. Only deploy this header trust model behind Vercel; direct self-hosting requires a trusted reverse proxy that overwrites visitor-IP headers.
+
+References: https://proxycheck.io/api/ and https://vercel.com/docs/headers/request-headers

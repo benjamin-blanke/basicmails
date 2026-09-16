@@ -7,6 +7,7 @@ export const site = {
 export const navigation = [
   { href: '/demo', label: 'Mailbox demo' },
   { href: '/experience', label: 'The experience' },
+  { href: '/team', label: 'Our team' },
   { href: '/about', label: 'Our thinking' },
   { href: '/updates', label: 'Build notes' },
 ];
