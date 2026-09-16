@@ -6,12 +6,11 @@
 ![Stars](https://img.shields.io/github/stars/benjamin-blanke/basicmails?style=social)
 ![Issues](https://img.shields.io/github/issues/benjamin-blanke/basicmails)
 
-██████╗  █████╗ ███████╗███████╗ ██████╗██╗██╗     ███████╗
-██╔══██╗██╔══██╗██╔════╝██╔════╝██╔════╝██║██║     ██╔════╝
-██████╔╝███████║█████╗  ███████╗██║     ██║██║     █████╗  
-██╔══██╗██╔══██║██╔══╝  ╚════██║██║     ██║██║     ██╔══╝  
-██║  ██║██║  ██║███████╗███████║╚██████╗██║███████╗███████╗
-╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝ ╚═════╝╚═╝╚══════╝╚══════╝
+  ____            _        __  __ _ _      
+ |  _ \ __ _  ___| | __   |  \/  (_) |_ ___
+ | |_) / _` |/ __| |/ /   | |\/| | | __/ _ \
+ |  __/ (_| | (__|   <    | |  | | | ||  __/
+ |_|   \__,_|\___|_|\_\   |_|  |_|_|\__\___|
 
 A modern, simple, and reliable email provider built for everyday communication. Fast, secure, and privacy-first — designed for both personal and professional use.
 
@@ -133,7 +132,7 @@ Advanced options live in `/config/*` and can be swapped via environment or runti
 - Core services
   - API service (REST + internal RPC)
   - Delivery worker pool (SMTP adapters)
-  - Storage abstraction (in-memory / filesystem / S3)
+  - Storage abstraction (in-memory / filesystem /S3)
   - Plugin manager (filters, spam rules, transforms)
 - Design goals
   - Small surface area — keep the core minimal
