@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "prebuild": "node scripts/check-waitlist-storage.mjs"
+    "check:waitlist": "node scripts/check-waitlist-storage.mjs"
   },
   "dependencies": {
     "next": "16.3.5",

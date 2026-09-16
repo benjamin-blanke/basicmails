@@ -55,6 +55,7 @@ export function emailContent(confirmURL:string,unsubscribeURL:string){
 }
 export async function subscribe(email:string){
  const c=config();if(!c)throw new Error('Not configured');
+ if(!/^re_[A-Za-z0-9_-]+$/.test(c.key))throw new WaitlistError('EMAIL_KEY_FORMAT');
  const lock=`wl:email:${digest(email)}`;
  const acquired=await redis<string|null>(['SET',lock,'1','NX','EX',3600]);if(!acquired)return;
  const total=await redis<number>(['EVAL',throttleScript,1,`wl:daily:${new Date().toISOString().slice(0,10)}`,86400]);

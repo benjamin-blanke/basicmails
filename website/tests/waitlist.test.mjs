@@ -8,7 +8,7 @@ test('email validation rejects header injection and malformed addresses',()=>{
 });
 test('invalid tokens cannot reach persistence',async()=>{const original=global.fetch;global.fetch=()=>{throw new Error('unexpected call');};try{assert.equal(await confirm('bad'),false);assert.equal(await unsubscribe('bad'),false);}finally{global.fetch=original;}});
 test('signup persists pending state before requesting mail; links have independent tokens and no query-string secrets',async()=>{
- Object.assign(process.env,{RESEND_API_KEY:'test-only',RESEND_FROM:'Basic Mails <hello@basicmails.de>',UPSTASH_REDIS_REST_URL:'https://redis.example',UPSTASH_REDIS_REST_TOKEN:'test-only'});
+ Object.assign(process.env,{RESEND_API_KEY:'re_test_only',RESEND_FROM:'Basic Mails <hello@basicmails.de>',UPSTASH_REDIS_REST_URL:'https://redis.example',UPSTASH_REDIS_REST_TOKEN:'test-only'});
  const original=global.fetch;const commands=[];let message;
  global.fetch=async(url,options)=>{const body=JSON.parse(options.body);if(String(url)==='https://redis.example'){commands.push(body);return Response.json({result:body[0]==='SET'?'OK':1});}assert.equal(String(url),'https://api.resend.com/emails');assert.equal(commands.length,3);message=body;assert.match(options.headers['Idempotency-Key'],/^waitlist-[a-f0-9]{64}$/);return Response.json({id:'test-id'});};
  try{await subscribe('alex@example.com');assert.equal(message.to[0],'alex@example.com');const confirmURL=message.text.match(/https:\/\/www.basicmails.de\/waitlist\/confirm#[a-f0-9]{64}/)[0];const removeURL=message.text.match(/https:\/\/www.basicmails.de\/waitlist\/unsubscribe#[a-f0-9]{64}/)[0];const a=new URL(confirmURL),b=new URL(removeURL);assert.equal(a.search,'');assert.notEqual(a.hash,b.hash);const pending=JSON.parse(commands[2][6]);assert.equal(pending.status,'pending');assert.equal(pending.consentVersion,'launch-notification-v1');assert.ok(!message.html.includes('test-only'));assert.equal(commands[2][3],`wl:entry:${digest(a.hash.slice(1))}`);}finally{global.fetch=original;}
@@ -20,3 +20,10 @@ test('duplicates do not send; storage errors fail closed',async()=>{
  const original=global.fetch;let n=0;global.fetch=async()=>{n++;return Response.json({result:null});};try{await subscribe('duplicate@example.com');assert.equal(n,1);global.fetch=async()=>Response.json({error:'unavailable'});await assert.rejects(redis(['GET','x']),/STORAGE_COMMAND/);}finally{global.fetch=original;}
 });
 test('email markup escapes link values',()=>{assert.ok(!emailContent('https://example.com/" onclick="bad','x').html.includes('href="https://example.com/" onclick='));});
+
+test('malformed API keys fail before creating pending records or sending',async()=>{
+ const original=global.fetch,key=process.env.RESEND_API_KEY;let calls=0;
+ global.fetch=async()=>{calls++;throw new Error('unexpected fetch');};
+ try{for(const invalid of ['re_abc…','re_abc\ndef','"re_abc"']){process.env.RESEND_API_KEY=invalid;await assert.rejects(subscribe('alex@example.com'),/EMAIL_KEY_FORMAT/);}assert.equal(calls,0);}
+ finally{global.fetch=original;process.env.RESEND_API_KEY=key;}
+});

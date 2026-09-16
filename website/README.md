@@ -103,3 +103,9 @@ The export includes each unsubscribe URL and consent timestamps. Store it privat
 ### Privacy notice review
 
 The published privacy text describes this implementation. Before activating sign-ups, verify the actual provider contracts/DPAs, database region, Vercel log retention, Resend retention and international-transfer safeguards for the accounts you use. These settings cannot be verified from source code. Update the notice if those settings or processing purposes change. The source links are included in the privacy page. The wording is an implementation-specific draft, not a legal compliance certification.
+
+### Waiting-list diagnostics
+
+Run `npm run check:waitlist` in an environment with the server variables loaded. This read-only check logs categories only and never prints credentials or subscriber data. Builds do not make diagnostic API calls.
+
+`EMAIL_KEY_FORMAT` means `RESEND_API_KEY` is not a complete valid-format key. Copy the full key when creating it in Resend (not a masked display), replace the Vercel Production environment variable, and redeploy. Never paste keys into chat, commit them, or prefix them with `NEXT_PUBLIC_`. The intended sender is `BasicMails Team <team@basicmails.de>`; verify `basicmails.de` in Resend.
