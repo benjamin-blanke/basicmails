@@ -77,3 +77,29 @@ Next.js Proxy checks the Vercel-provided visitor IP against the supported proxyc
 When configured, lookup errors, quota failures and missing visitor IPs return a separate HTTP 503 screen, never a false VPN accusation. Lookups time out after four seconds. A bounded per-instance memory cache stores allowed results for 60 seconds and blocked results for 15 seconds; this is not a distributed cache. IP addresses are sent to proxycheck.io for the lookup. Only deploy this header trust model behind Vercel; direct self-hosting requires a trusted reverse proxy that overwrites visitor-IP headers.
 
 References: https://proxycheck.io/api/ and https://vercel.com/docs/headers/request-headers
+
+## Launch waiting list
+
+Routes: `/waitlist`, `/waitlist/confirm`, `/waitlist/unsubscribe`, `/roadmap`, `/datenschutz`. Unknown URLs render the custom 404 page.
+
+Configure these **server-only Vercel Production variables**, then redeploy:
+
+- `RESEND_API_KEY`: Resend sending API key.
+- `RESEND_FROM`: e.g. `Basic Mails <hello@basicmails.de>`. The sending domain must first be verified in Resend; the resend.dev test sender cannot deliver to arbitrary visitors.
+- `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`: a dedicated private Upstash Redis database (EU region recommended), available through Vercel Storage / Marketplace.
+
+The canonical origin is `https://www.basicmails.de`. No password or shared signing secret is needed for the waiting list: tokens are independently random 256-bit values, with only their hashes used in keys. Pending addresses are NOT active subscribers. Opening an email link does not change state; the user must press the confirmation button (POST). Tokens travel in URL fragments, are removed from the browser address after loading, and never appear in server request URLs. Abmeldung and confirmation remain reachable from VPN connections.
+
+Duplicate address records are prevented atomically in Redis. Pending entries expire after 48 hours. Confirmed entries and unsubscribe links expire after one year; removal deletes the subscription immediately and old confirmation links cannot restore it. Confirmation is idempotent. Requests are limited to five per IP/hour, one attempted email per address/hour and 100 attempted confirmation sends/day across all server instances. Limits fail closed if Redis is unavailable. A honeypot and same-origin checks provide additional protection. On an ambiguous Resend network timeout, pending records remain valid in case the message was accepted.
+
+Confirmation emails include both HTML/plain text and a remove/unsubscribe link. Keep Resend click/open tracking disabled for these transactional links. No broadcasts or marketing messages are sent by the deployment. To export currently confirmed subscribers from a trusted terminal with the same variables set:
+
+```bash
+node --experimental-strip-types scripts/export-waitlist.mjs > waitlist.json
+```
+
+The export includes each unsubscribe URL and consent timestamps. Store it privately; check subscription state again before any later launch mailing, and include the unsubscribe link. Do not commit subscriber data. Customer requests can also be removed by their email address using the private `wl:address:<sha256(normalized-email)>` index and the associated entry/unsubscribe keys.
+
+### Privacy notice review
+
+The published privacy text describes this implementation. Before activating sign-ups, verify the actual provider contracts/DPAs, database region, Vercel log retention, Resend retention and international-transfer safeguards for the accounts you use. These settings cannot be verified from source code. Update the notice if those settings or processing purposes change. The source links are included in the privacy page. The wording is an implementation-specific draft, not a legal compliance certification.

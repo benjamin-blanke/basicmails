@@ -4,7 +4,7 @@ import { restrictedHTML } from './lib/security/restricted';
 export async function proxy(request:NextRequest){
  const path=request.nextUrl.pathname;
  // Legal information and sign-out stay accessible even from restricted networks.
- if(path==='/impressum'||path==='/impressum/'||path==='/api/demo/logout')return NextResponse.next();
+ if(['/impressum','/datenschutz','/waitlist/confirm','/waitlist/unsubscribe','/api/waitlist/confirm','/api/waitlist/unsubscribe','/api/demo/logout'].includes(path.replace(/\/$/,'')))return NextResponse.next();
  const key=process.env.PROXYCHECK_API_KEY?.trim();
  // Deploy the integration safely before its private API key is provisioned.
  if(!key)return NextResponse.next();
