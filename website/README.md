@@ -32,7 +32,7 @@ npm start
 
 Search sample mail (press `/` while focused inside the preview), filter unread messages, star/unstar, archive/restore, mark read/unread, reset the demo, and compose or edit a demo draft. Native dialogs handle keyboard focus and Escape. On mobile, opening a message switches to the reading pane with a back button. Demo state is memory-only and resets on refresh or route navigation. No messages are sent, no accounts are created, and no waitlist data is collected.
 
-Light/dark theme preference is stored locally. Motion respects reduced-motion preferences. All mail content is fictional. The actual mail service has not launched.
+The matte dark theme is rendered on the server and is consistent across all pages. Motion respects reduced-motion preferences. All mail content is fictional. The actual mail service has not launched.
 
 ## Vercel
 
