@@ -1,0 +1,9 @@
+{
+  "name": "basicmails-website",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": { "dev": "next dev", "build": "next build", "start": "next start", "typecheck": "tsc --noEmit" },
+  "dependencies": { "next": "16.3.5", "react": "^19.2.0", "react-dom": "^19.2.0", "motion": "^12.23.24" },
+  "devDependencies": { "typescript": "^5.9.3", "@types/node": "^22.0.0", "@types/react": "^19.0.0", "@types/react-dom": "^19.0.0" },
+  "engines": { "node": "22.x" }
+}

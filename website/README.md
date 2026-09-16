@@ -1,25 +1,45 @@
-# Basic Mails — Coming soon
+# Basic Mails website
 
-A lightweight, responsive coming-soon page with a soft purple/pink accent, subtle entrance animation, and an illustrative inbox preview. All website files live in `website/`; no root-level application files or dependencies are required.
+Next.js App Router + TypeScript + React + Motion. All source lives in `website/`.
 
-## Preview locally
+## Run
 
-From the repository directory, run:
+Requires Node.js 20.9 or newer.
 
 ```sh
-python3 -m http.server 8080 --directory website
+cd website
+npm install
+npm run dev
 ```
 
-Open http://localhost:8080. You can also open `website/index.html` directly in a browser.
+## Validate and build
 
-## Deploy
+```sh
+npm run typecheck
+npm run build
+npm start
+```
 
-Serve `website/` as the static document root. No install or build command is needed. For a host that asks for a project root or output directory, select `website`.
+## Routes
 
-## Files
+- `/`: animated coming-soon home, interactive inbox, feature principles
+- `/experience`: larger interactive mail preview
+- `/about`: project philosophy
+- `/updates`: build notes and animated FAQ
+- `/sitemap.xml`, `/robots.txt`: search engine metadata
 
-- `index.html`: page content and metadata
-- `styles.css`: responsive styles and reduced-motion support
-- `favicon.svg`: local brand favicon
+## Interactive preview
 
-The page does not load external fonts, use analytics, collect email addresses, or require JavaScript. GitHub links point to this repository. The inbox is explicitly labeled as a design preview, not a working mail client. No launch date, pricing, or unconfirmed technical features are promised.
+Search sample mail (press `/` while focused inside the preview), filter unread messages, star/unstar, archive/restore, mark read/unread, reset the demo, and compose or edit a demo draft. Native dialogs handle keyboard focus and Escape. On mobile, opening a message switches to the reading pane with a back button. Demo state is memory-only and resets on refresh or route navigation. No messages are sent, no accounts are created, and no waitlist data is collected.
+
+Light/dark theme preference is stored locally. Motion respects reduced-motion preferences. All mail content is fictional. The actual mail service has not launched.
+
+## Vercel
+
+Import the repository with **Root Directory: `website`** and **Framework: Next.js**. The included `vercel.json` sets the install/build commands. Direct connector deployments upload the contents of this folder. Automatic GitHub deployment requires linking the repository in Vercel.
+
+No environment variables are required. Geist is optimized with `next/font`. The site origin is configured in `src/lib/site.ts`.
+
+## Structure
+
+`src/app` owns routes and metadata, `src/components` contains reusable UI and interactive components, `src/lib` holds site configuration and sample content, `src/styles` contains the inbox and route styles, and `public` contains the favicon.
