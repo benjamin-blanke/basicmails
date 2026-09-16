@@ -38,8 +38,30 @@ The matte dark theme is rendered on the server and is consistent across all page
 
 Import the repository with **Root Directory: `website`** and **Framework: Next.js**. The included `vercel.json` sets the install/build commands. Direct connector deployments upload the contents of this folder. Automatic GitHub deployment requires linking the repository in Vercel.
 
-No environment variables are required. Geist is optimized with `next/font`. The site origin is configured in `src/lib/site.ts`.
+The marketing pages require no environment variables. The protected demo requires `DEMO_PASSWORD` (see below). Geist is optimized with `next/font`. The site origin is configured in `src/lib/site.ts`.
 
 ## Structure
 
 `src/app` owns routes and metadata, `src/components` contains reusable UI and interactive components, `src/lib` holds site configuration and sample content, `src/styles` contains the inbox and route styles, and `public` contains the favicon.
+
+
+## Protected mailbox demo: `/demo`
+
+Set **DEMO_PASSWORD** in Vercel → Basic Mails → Settings → Environment Variables for **Production** (and Preview if desired), then redeploy. Use a random password of at least **16 characters**. Do not prefix it with `NEXT_PUBLIC_`. An absent or short password leaves the demo locked. Nothing sensitive is embedded in the source.
+
+For local development copy `.env.example` to `.env.local` and set your own password. Sign in at `/demo/login`.
+
+The demo includes inbox, starred, drafts, sample sent messages, archive, spam and trash; full-text search and filters; bulk actions and undo; labels; autosaved drafts with Cc/Bcc, attachments, replies and forwards; downloadable attachments and EML export; contact CRUD; signature, name and density settings; and a reset option. **There is no sending endpoint and no live receiving integration.**
+
+Each browser has its own mailbox. State is encrypted with AES-GCM in localStorage; the encryption key is only delivered after server authentication. Mailbox data is not synchronized between devices. Up to 1 MB per attachment and 2 MB per draft are allowed, subject to browser quota. Saving failures are displayed in the status bar. Avoid real confidential data in this demo.
+
+Authentication uses server-verified HMAC sessions in HttpOnly, SameSite=Strict cookies (Secure and __Host- prefix in production), with an 8-hour expiry. Login and logout require same-origin requests. Missing or short password configuration fails closed. Password rotation invalidates existing sessions and makes previous local encrypted demo data unreadable; a fresh sample mailbox is then loaded. Throttling is best-effort per server instance, not a distributed rate limiter. Logout removes the browser session cookie; shared-password demo access is not a multi-user account system.
+
+### Validation
+
+```sh
+npm run typecheck
+node --experimental-strip-types --test tests/demo-auth.test.mjs
+```
+
+The source remains in `website/`. Import that subfolder as the Vercel root when linking GitHub.

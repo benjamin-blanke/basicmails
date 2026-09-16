@@ -1,5 +1,12 @@
 import type { CSSProperties } from 'react';
 const paths = {
+  trash: 'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7',
+  contacts: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0M18 8v6M15 11h6',
+  settings: 'M4 7h16M4 17h16M8 4v6M16 14v6',
+  logout: 'M9 3H3v18h6M9 12h12m-5-5 5 5-5 5',
+  attachment: 'm8 13 6-6a3 3 0 0 1 4 4l-8 8a5 5 0 0 1-7-7l9-9M7 14l6-6',
+  download: 'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',
+
   arrow: 'M5 12h14M13 6l6 6-6 6',
   upRight: 'M6 18 18 6M6 6h12v12',
   inbox: 'M4 4h16l2 10v6H2v-6L4 4ZM2 14h6l2 3h4l2-3h6',

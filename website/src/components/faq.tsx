@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Icon } from './icon';
 const questions = [
- ['Can I create an account yet?', 'Not yet. Basic Mails is in development. You can explore the interactive design preview now, but it is not connected to a real mailbox.'],
+ ['Can I create an account yet?', 'Not yet. Basic Mails is in development. You can explore the design preview or sign in to the password-protected mailbox demo. Neither is connected to a real mailbox.'],
  ['When will Basic Mails launch?', "We haven't announced a launch date. We want to get the essentials right before opening the doors. New milestones will appear in our build notes."],
  ['Is the inbox preview real?', 'The interactions are real; the messages are samples. You can search, star, archive, and write a demo draft. Nothing is sent, and changes disappear when you refresh.'],
  ['Will there be free accounts or custom domains?', "Plans, pricing, domains, and technical features haven't been finalized. We'll share confirmed details before launch."],
