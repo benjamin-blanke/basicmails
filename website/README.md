@@ -109,3 +109,5 @@ The published privacy text describes this implementation. Before activating sign
 Run `npm run check:waitlist` in an environment with the server variables loaded. This read-only check logs categories only and never prints credentials or subscriber data. Builds do not make diagnostic API calls.
 
 `EMAIL_KEY_FORMAT` means `RESEND_API_KEY` is not a complete valid-format key. Copy the full key when creating it in Resend (not a masked display), replace the Vercel Production environment variable, and redeploy. Never paste keys into chat, commit them, or prefix them with `NEXT_PUBLIC_`. The intended sender is `BasicMails Team <team@basicmails.de>`; verify `basicmails.de` in Resend.
+
+Unconfirmed requests can request a fresh link after the one-hour resend cooldown. This also recovers from an earlier failed connection; replacing a pending request invalidates its old confirmation link. Confirmed subscriptions are preserved.
