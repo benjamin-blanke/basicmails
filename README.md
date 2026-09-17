@@ -1,219 +1,146 @@
+<div align="center">
+
 # BasicMails
 
-![Release](https://img.shields.io/github/v/release/benjamin-blanke/basicmails?label=release)
-![License](https://img.shields.io/github/license/benjamin-blanke/basicmails)
-![Language](https://img.shields.io/github/languages/top/benjamin-blanke/basicmails)
-![Stars](https://img.shields.io/github/stars/benjamin-blanke/basicmails?style=social)
-![Issues](https://img.shields.io/github/issues/benjamin-blanke/basicmails)
+### Email, without the noise.
 
-The world is loud enough. Your inbox doesn't have to be.
+A calmer, more considered inbox experience — designed around clarity, privacy, and the belief that email should feel simple again.
 
----
+[**Visit basicmails.com →**](https://basicmails.com)
 
-## Table of Contents
-- [Why BasicMails](#why-basicmails)
-- [Features](#features)
-- [ASCII vibe](#ascii-vibe)
-- [Quick Start](#quick-start)
-- [Usage Examples](#usage-examples)
-  - [Programmatic API (TypeScript)](#programmatic-api-typescript)
-  - [CLI (local dev)](#cli-local-dev)
-- [Configuration](#configuration)
-- [Architecture & Design](#architecture--design)
-- [Deployment](#deployment)
-- [Testing & CI](#testing--ci)
-- [Observability & Metrics](#observability--metrics)
-- [Security & Privacy](#security--privacy)
-- [Contributing](#contributing)
-- [Roadmap](#roadmap)
-- [License](#license)
-- [Contact & Support](#contact--support)
-- [Acknowledgements](#acknowledgements)
+<br />
 
----
+[![Website](https://img.shields.io/badge/website-basicmails.com-111111?style=for-the-badge&logo=vercel&logoColor=white)](https://basicmails.com)
+[![Built with Next.js](https://img.shields.io/badge/built%20with-Next.js-111111?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-first-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-## Why BasicMails
-Email doesn't need to be complicated. BasicMails strips the cruft while keeping the important stuff: reliable delivery, privacy-first defaults, and a pleasant developer experience. It’s built to be easy to run, extend, and integrate.
+</div>
 
-## Features
-- ✅ TypeScript-first, easy to read and extend
-- 🔒 Privacy-minded defaults and secure storage options
-- ⚡ High-throughput delivery with simple queuing
-- 📧 REST + programmatic client APIs for send/receive
-- ♻️ Plugin system for storage, spam rules, and integrations
-- 📬 SMTP-compatible endpoints for legacy interoperability
-- 🧪 Test harness and local dev CLI to simulate mail flows
+<br />
 
-## ASCII vibe
-Because README art matters. Here’s a little mailbox:
+> **The world is loud enough. Your inbox doesn't have to be.**
 
-```text
-     .----------------.
-     |  ______  ____  |
-     | / ____ \|  _ \ |
-     || |    | | |_) )|
-     || |    | |  __/ |
-     || |____| | |    |
-     | \______/|_|    |
-     '----------------'
-          \   ^__^
-           \  (oo)\_______
-              (__)\       )\/\
-                  ||----w |
-                  ||     ||
-```
+BasicMails is a modern email concept and interactive product experience for everyday communication. The current repository contains the product website, an interactive mailbox preview, a protected demo, and the launch infrastructure around it.
 
----
+## The idea
 
-## Quick Start
+Most inboxes compete for your attention. BasicMails takes the opposite approach:
 
-Clone, install, and run a dev instance:
+- **Quiet by default** — less visual noise, fewer distractions.
+- **Clear by design** — the important things should be obvious.
+- **Privacy at the core** — thoughtful defaults and careful handling of sensitive data.
+- **Made for real life** — a familiar experience without unnecessary complexity.
+
+## Explore the experience
+
+The website is a dark, responsive Next.js experience with motion that respects reduced-motion preferences. Try the interactive mailbox preview to:
+
+- search sample messages;
+- filter unread mail;
+- star, archive, restore, and mark messages read or unread;
+- compose and edit a demo draft; and
+- explore the larger mail experience at `/experience`.
+
+> All messages in the public preview are fictional. The actual mail service has not launched yet.
+
+### Routes
+
+| Route | What you'll find |
+| --- | --- |
+| `/` | Landing page, product principles, and interactive inbox preview |
+| `/experience` | A larger interactive mailbox experience |
+| `/about` | The philosophy behind BasicMails |
+| `/updates` | Build notes and animated FAQ |
+| `/team` | The people behind the project |
+| `/waitlist` | Launch waiting list |
+| `/roadmap` | What is coming next |
+| `/demo` | Protected mailbox demo |
+
+## Run it locally
+
+The product website lives in [`website/`](./website) and requires **Node.js 22.x**.
 
 ```bash
 git clone https://github.com/benjamin-blanke/basicmails.git
-cd basicmails
+cd basicmails/website
 npm install
 npm run dev
-# or with pnpm
-pnpm install
-pnpm dev
 ```
 
-Open http://localhost:3000 (or whatever dev port is printed) and use the local web UI or CLI to enqueue test messages.
+Open [http://localhost:3000](http://localhost:3000) and start exploring.
 
-## Usage Examples
+### Validate and build
 
-### Programmatic API (TypeScript)
-```ts
-import { BasicMailsClient } from 'basicmails'
-
-const client = new BasicMailsClient({
-  apiKey: process.env.BASICMAILS_API_KEY,
-  baseUrl: process.env.BASICMAILS_API_URL || 'http://localhost:3000'
-})
-
-await client.send({
-  to: 'friend@example.com',
-  from: 'you@basicmails.local',
-  subject: 'Hello from BasicMails',
-  text: 'This is a quick test email.'
-})
-```
-
-### CLI (local dev)
-Send a test email via the local CLI tool:
 ```bash
-# from project root
-npx basicmails send --to friend@example.com --subject "Test" --text "Hello from CLI"
+npm run typecheck
+npm run build
+npm start
 ```
 
-## Configuration
+To run the demo authentication test:
 
-Create a `.env` at the project root with the basics (example):
-
-```
-BASICMAILS_SMTP_HOST=smtp.example.com
-BASICMAILS_SMTP_PORT=587
-BASICMAILS_SMTP_USER=username
-BASICMAILS_SMTP_PASS=secret
-BASICMAILS_API_KEY=your_api_key_here
-BASICMAILS_DKIM_PRIVATE_KEY_PATH=/etc/dkim/private.key
-BASICMAILS_DKIM_SELECTOR=basicmail
-```
-
-Advanced options live in `/config/*` and can be swapped via environment or runtime config providers.
-
-## Architecture & Design
-
-- Core services
-  - API service (REST + internal RPC)
-  - Delivery worker pool (SMTP adapters)
-  - Storage abstraction (in-memory / filesystem /S3)
-  - Plugin manager (filters, spam rules, transforms)
-- Design goals
-  - Small surface area — keep the core minimal
-  - Extensible via plugins and adapters
-  - Observable and testable
-
-Diagram (conceptual):
-
-[API] <--> [Queue] <--> [Delivery Workers] <--> [SMTP/Provider]
-                 |
-                 +--> [Storage: messages, logs]
-                 +--> [Plugins: DKIM, spam, routing]
-
-## Deployment
-
-- Containerized: Dockerfile included
-- Kubernetes: Example manifests under `/deploy/k8s`
-- Environment deployments: use secrets for API keys and DKIM private keys
-- Rolling updates: leverage healthchecks and readiness probes to avoid data loss
-
-Example Docker run:
 ```bash
-docker build -t basicmails:latest .
-docker run -e BASICMAILS_API_KEY=xxx -p 3000:3000 basicmails:latest
+node --experimental-strip-types --test tests/demo-auth.test.mjs
 ```
 
-## Testing & CI
+## Project map
 
-- Unit tests: Jest or vitest (src/*.test.ts)
-- Integration: lightweight harness spins up an ephemeral SMTP endpoint
-- Suggested GitHub Actions:
-  - lint + typecheck on pull_request
-  - tests + build on push to main
-  - release action to publish a release artifact
+```text
+basicmails/
+├── website/
+│   ├── src/app/          # Routes, metadata, and server entry points
+│   ├── src/components/   # Reusable UI and interactive experiences
+│   ├── src/lib/          # Site configuration and sample content
+│   ├── src/styles/       # Inbox and route styling
+│   ├── tests/            # Focused validation tests
+│   └── vercel.json       # Website build configuration
+├── CONTRIBUTING.md
+├── SECURITY.md
+├── SUPPORT.md
+└── README.md
+```
 
-## Observability & Metrics
+## Deploy the website
 
-- Expose Prometheus metrics at /metrics
-- Request logs + delivery timing and success/failure counters
-- Optional integration: Sentry for error grouping
+The website is configured for Vercel:
 
-## Security & Privacy
+1. Import this repository into Vercel.
+2. Set the project **Root Directory** to `website`.
+3. Select **Next.js** as the framework.
+4. Deploy.
 
-- Keep DKIM private keys in a secrets manager, never committed to the repo
-- Default to privacy-preserving logging (truncate PII in logs)
-- Encourage TLS-only SMTP connections
-- If you discover a vulnerability: open a confidential issue or email the maintainer — do not post secrets or exploit details publicly.
+The included [`website/vercel.json`](./website/vercel.json) defines the install and build commands. Marketing pages work without environment variables. The protected demo and launch waiting list require the server-only variables documented in [`website/README.md`](./website/README.md).
 
 ## Contributing
 
-We love contributions! Suggested workflow:
+Have a thoughtful improvement? Contributions are welcome.
 
-1. Fork the repo and create a feature branch (`feature/awesome-mail`)
-2. Add tests for new behavior
-3. Open a PR with a clear description and link to any relevant issues
-4. CI will run lint, types, and tests; maintainers will review
+1. Fork the repository.
+2. Create a focused branch.
+3. Make the change and add tests where appropriate.
+4. Run the relevant type checks and validation.
+5. Open a pull request with context and screenshots for visual changes.
 
-Pull request checklist:
-- [ ] Tests added or updated
-- [ ] Linting passes
-- [ ] Types checked (tsc)
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for the project workflow and [`CODE_OF_CONDUCT.md`](./CODE_OF_CONDUCT.md) for community guidelines.
 
-If you want a template, see `.github/PULL_REQUEST_TEMPLATE.md` (coming soon — PRs to add are welcome).
+## Security & support
 
-## Roadmap (short-term)
-- [ ] First-class plugin SDK
-- [ ] Hosted demo instance + deployment guide
-- [ ] DKIM management tooling
-- [ ] Better admin UI and message inspection features
+Please do not publish vulnerabilities, secrets, or exploit details in public issues. Follow the private reporting guidance in [`SECURITY.md`](./SECURITY.md).
 
-## Advanced Topics
+For questions, bugs, and product feedback, see [`SUPPORT.md`](./SUPPORT.md) or open an issue.
 
-- DKIM/DMARC: BasicMails provides hooks to sign outbound messages with DKIM; ensure DNS TXT records match your selector.
-- Backpressure: delivery workers back off and persist messages for retries.
-- Storage: switch between local, S3, or a DB-backed store with a config toggle.
+## Roadmap
 
-## License
-This project is available under the LICENSE in this repository.
+BasicMails is being built in public. The direction is simple: make email feel calmer, more intentional, and easier to trust.
 
-## Contact & Support
-Built with care by [Benjamin](https://blanke.lol)
+The current roadmap includes continued work on the mailbox experience, launch readiness, privacy details, and the foundations of the service behind the interface.
 
-For hosting, enterprise features, or security questions, open an issue or reach out via the contact listed on the profile.
+<div align="center">
 
-## Acknowledgements
-Thanks to maintainers and contributors who keep this project simple, secure, and fast.
+<br />
 
----
+**Simple is not less. It's focused.**
+
+[Website](https://basicmails.com) · [Issues](https://github.com/benjamin-blanke/basicmails/issues) · [Contributing](./CONTRIBUTING.md)
+
+</div>
